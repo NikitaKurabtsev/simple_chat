@@ -1,27 +1,26 @@
+from email import message
 import socket
 
 
-server_socket = socket.socket()
-server_host = socket.gethostname()
-ip = socket.gethostbyname(server_host)
-server_port = 8080
+with socket.socket() as client_socket:
+    server_host = input("Enter server host: ")
+    server_port = int(input("Enter server port: "))
+    
+    name = input("Input your name: ")
 
-print("This is your ip adress: ", ip)
+    client_socket.connect((server_host, server_port))
 
-server_host = input("Enter friend/'s IP Address: ")
-name = input("Input your name: ")
+    client_socket.send(name.encode())
+    server_name = client_socket.recv(1024).decode()
 
-server_socket.connect((server_host, server_port))
+    print(server_name, " Has joined...")
 
-server_socket.send(name.encode())
-server_name = server_socket.recv(1024).decode()
-
-print(server_name, " Has joined...")
-
-while True:
-    message = server_socket.recv(1024).decode()
-    print(server_name, ":", message)
-    message = input("Me: ")
-    if not message:
-        break
-    server_socket.send(message.encode())
+    while True:
+        message = client_socket.recv(1024).decode()
+        if not message:
+            break
+        print(server_name, ":", message)
+        message = input("Me: ")
+        if not message:
+            break
+        client_socket.send(message.encode())
